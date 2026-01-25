@@ -1,29 +1,37 @@
-#include "../include/firewall.h"
 #include <iostream>
-#include <cstdlib> // Required for std::system
+#include <string>
+#include "firewall.cpp"   // In a real project, we'd use headers, but this works for now
+#include "scheduler.cpp"
 
-bool NetFirewall::authorizeDevice(const std::string& macAddress) {
-    // Command: Insert (-I) a rule into the FORWARD chain to ACCEPT traffic from this MAC
-    std::string command = "sudo iptables -I FORWARD -m mac --mac-source " + macAddress + " -j ACCEPT";
-    
-    std::cout << "[LOG] Attempting to authorize: " << macAddress << std::endl;
-    
-    if (runSystemCommand(command) == 0) {
-        std::cout << "[SUCCESS] Device " << macAddress << " is now whitelisted." << std::endl;
-        return true;
+int main() {
+    NetFirewall firewall;
+    SessionReaper reaper;
+
+    std::cout << "========================================" << std::endl;
+    std::cout << "   NetPass++ Wi-Fi Gateway Active       " << std::endl;
+    std::cout << "========================================" << std::endl;
+
+    // 1. Simulate a user device detected by the router
+    std::string userMAC = "44:65:7D:D2:11:AB";
+    std::cout << "\n[EVENT] New device detected: " << userMAC << std::endl;
+
+    // 2. Simulate a "Payment Success" from M-Pesa or Stripe
+    std::cout << "[PAYMENT] Received payment for 10-second 'Trial' plan." << std::endl;
+
+    // 3. Authorize the device in the firewall
+    if (firewall.authorizeDevice(userMAC)) {
+        
+        // 4. Start the background timer (The Reaper)
+        // This will wait 10 seconds and then run revokeAccess()
+        reaper.startSession(userMAC, 10);
+        
+        std::cout << "[SYSTEM] User is now online. Monitoring session..." << std::endl;
     }
-    return false;
-}
 
-bool NetFirewall::revokeAccess(const std::string& macAddress) {
-    // Command: Delete (-D) the specific rule for this MAC address
-    std::string command = "sudo iptables -D FORWARD -m mac --mac-source " + macAddress + " -j ACCEPT";
-    
-    std::cout << "[LOG] Revoking access for: " << macAddress << std::endl;
-    return (runSystemCommand(command) == 0);
-}
+    // Keep the main program running so the background thread has time to finish
+    std::cout << "\n[DEBUG] Main program staying alive for the timer..." << std::endl;
+    std::this_thread::sleep_for(std::chrono::seconds(15));
 
-int NetFirewall::runSystemCommand(const std::string& command) {
-    // Converts std::string to a C-style string and executes it in the shell
-    return std::system(command.c_str());
+    std::cout << "\n[SYSTEM] Simulation complete. Shutting down." << std::endl;
+    return 0;
 }
