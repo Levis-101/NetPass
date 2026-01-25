@@ -50,3 +50,32 @@ make
 
 # Run (Requires sudo for firewall access)
 sudo ./NetPass
+
+🛠️ System Architecture & How it Works
+NetPass++ is built on a high-performance C++17 stack designed for low-latency network management.
+
+1. The Gateway Listener (Crow API)
+The system runs a multi-threaded Crow web server that exposes a REST endpoint (/mpesa-callback). This listener waits for a JSON payload from the M-Pesa Daraja API. When a payment is confirmed:
+
+It validates the transaction amount.
+
+It extracts the user's MAC address from the metadata.
+
+2. The Firewall Controller (Linux Iptables)
+Once payment is verified, the NetFirewall class takes over. It uses System Calls to manipulate the Linux Kernel's packet-filtering rules:
+
+Granting Access: sudo iptables -I FORWARD -m mac --mac-source [MAC] -j ACCEPT
+
+Revoking Access: sudo iptables -D FORWARD -m mac --mac-source [MAC] -j ACCEPT
+
+3. The Session Reaper (Concurrency)
+To handle timed subscriptions (e.g., 1 hour of internet), the system spawns an asynchronous thread using <thread>. This "Reaper" sleeps for the duration of the purchased plan and then automatically triggers a firewall rule deletion, ensuring the user is disconnected exactly when their time expires.
+
+4. Persistent Storage (SQLite/CSV)
+Every transaction is logged into a persistent storage layer. This ensures that even if the router restarts, we have a record of:
+
+Phone Number (for customer support)
+
+Amount Paid (for business analytics)
+
+Timestamp (for session recovery)
