@@ -1,31 +1,52 @@
-# 🚀 NetPass: Subscription-Based Wi-Fi Captive Portal
+# NetPass++: C++ Subscription-Based Wi-Fi Gateway
 
-![Python](https://img.shields.io/badge/python-3.10+-blue.svg)
-![License](https://img.shields.io/badge/license-MIT-green.svg)
-![Status](https://img.shields.io/badge/status-In--Development-orange.svg)
+![Language](https://img.shields.io/badge/Language-C%2B%2B-blue.svg)
+![Platform](https://img.shields.io/badge/Platform-Linux-lightgrey.svg)
+![Status](https://img.shields.io/badge/Status-Active-green.svg)
 
-**NetPass** is an automated Wi-Fi access management system that combines a captive portal, automated MAC-address filtering, and subscription-based payment processing. Designed for small businesses, cafes, or community hotspots.
+**NetPass++** is a high-performance system utility designed to monetize Wi-Fi access. It uses C++ to interact directly with the Linux networking stack to manage user sessions, handle payments, and control internet access via MAC address filtering.
+
+---
 
 ## 🛠 Features
-- **Captive Portal:** Automatic redirection of unauthenticated users to a login/payment page.
-- **Subscription Tiers:** Daily, Weekly, and Monthly access plans.
-- **Automated MAC Filtering:** Dynamically updates router firewall rules (`iptables`) based on payment status.
-- **Payment Integration:** Supports Stripe/PayPal/M-Pesa for automated billing.
-- **Dashboard:** Admin view to track active connections and revenue.
+- **Captive Portal:** Redirects unauthorized users to a professional login/payment page.
+- **MAC Filtering:** Uses `iptables` system calls to whitelist devices in real-time.
+- **Subscription Logic:** Supports Daily, Weekly, and Monthly access tiers.
+- **Payment Integration:** Communicates with Stripe/M-Pesa APIs using `libcurl`.
+- **Session Reaper:** A background thread that automatically disconnects users once their time expires.
+
+---
+
+## ⚙️ Technical Stack
+- **Core Language:** C++17 (System-level programming)
+- **Web Server:** [Crow](https://github.com/CrowCpp/Crow) (A Fast C++ Framework inspired by Flask)
+- **Networking:** Linux `iptables` and Socket Programming.
+- **Database:** SQLite (C/C++ API) for user data and logs.
+- **API Calls:** `libcurl` for secure payment processing.
+
+---
 
 ## 📐 System Architecture
 
 
-The system operates by intercepting DNS/HTTP requests from unauthorized MAC addresses and routing them to a local Flask server. Once the payment API returns a "Success" webhook, the backend executes a script to whitelist the device's MAC address for the duration of the subscription.
+The system intercepts unauthenticated traffic and forces a DNS redirect to a local Crow server. Upon payment verification via a webhook, the `FirewallManager` class executes an `iptables` command to allow the specific MAC address for the purchased duration.
 
-## 💻 Tech Stack
-- **Backend:** Python (Flask/FastAPI)
-- **Database:** SQLite/PostgreSQL (User records & MAC timestamps)
-- **Networking:** Hostapd, Dnsmasq, Iptables (on Linux/OpenWrt)
-- **Payments:** Stripe API / M-Pesa Daraja API
-- **Frontend:** Bootstrap 5 (Responsive Login Portal)
+---
 
-## 🚀 Quick Start
-1. **Clone the repo:**
-   ```bash
-   git clone [https://github.com/yourusername/netpass-wifi.git](https://github.com/yourusername/netpass-wifi.git)
+## 🚀 Build Instructions
+You will need a C++ compiler and `cmake` installed.
+
+```bash
+# Clone the repository
+git clone [https://github.com/yourusername/NetPass-CPP.git](https://github.com/yourusername/NetPass-CPP.git)
+cd NetPass-CPP
+
+# Create build directory
+mkdir build && cd build
+
+# Compile
+cmake ..
+make
+
+# Run (Requires sudo for firewall access)
+sudo ./NetPass
