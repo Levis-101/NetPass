@@ -1,6 +1,9 @@
-#include "../include/crow_all.h" // You need the library file here!
-#include "../include/firewall.h"
-#include <iostream.h>
+#include "NetPass\include\crow_all.h" // You need the library file here!
+#include "NetPass\src\firewall.h"
+#include <iostream>
+
+using namespace std;
+
 
 int main() {
     crow::SimpleApp app;
