@@ -1,48 +1,47 @@
-#include "NetPass\include\crow_all.h" // You need the library file here!
-#include "NetPass\src\firewall.h"
+#include "../include/crow_all.h" 
+#include "../include/firewall.h" // Point to the header in include/
 #include <iostream>
 
 using namespace std;
-
 
 int main() {
     crow::SimpleApp app;
     NetFirewall firewall;
 
-    std::cout << ">>> NetPass Payment Listener Started on Port 18080" << std::endl;
+    cout << "==========================================" << endl;
+    cout << ">>> NetPass M-Pesa Listener: Port 18080" << endl;
+    cout << "==========================================" << endl;
 
-    // Route: This is where M-Pesa sends the payment confirmation
-    // URL: http://your-server-ip:18080/mpesa-callback
+    // Route: M-Pesa Webhook Endpoint
     CROW_ROUTE(app, "/mpesa-callback").methods(crow::HTTPMethod::POST)
     ([&firewall](const crow::request& req) {
         
-        // 1. Parse the incoming JSON from M-Pesa
         auto x = crow::json::load(req.body);
         
         if (!x) {
             return crow::response(400, "Invalid JSON");
         }
 
-        std::cout << "[MPESA] Webhook Received!" << std::endl;
-
-        // 2. Extract Data (Simulated M-Pesa Payload Structure)
-        // In reality, M-Pesa JSON is nested, but we'll keep it simple
-        std::string phoneNumber = x["PhoneNumber"].s();
+        // Extracting data from M-Pesa JSON
+        // Note: .s() gets string, .d() gets double/number
+        string phoneNumber = x["PhoneNumber"].s();
         double amount = x["Amount"].d();
-        std::string macAddress = x["MacAddress"].s(); // You'd likely pass this in the Reference
+        string macAddress = x["MacAddress"].s(); 
 
-        std::cout << "   User: " << phoneNumber << std::endl;
-        std::cout << "   Paid: " << amount << " KES" << std::endl;
+        cout << "\n[PAYMENT] Webhook Received!" << endl;
+        cout << "   Phone: " << phoneNumber << " | Amount: " << amount << " KES" << endl;
+        cout << "   Target MAC: " << macAddress << endl;
 
-        // 3. Logic: If they paid enough, open the internet
         if (amount >= 10.0) {
-            firewall.authorizeDevice(macAddress);
-            return crow::response(200, "{\"ResultCode\": 0, \"ResultDesc\": \"Service Granted\"}");
-        } else {
-            return crow::response(200, "{\"ResultCode\": 1, \"ResultDesc\": \"Insufficient Funds\"}");
-        }
+            // Trigger the Linux Firewall
+            if(firewall.authorizeDevice(macAddress)) {
+                return crow::response(200, "{\"ResultCode\": 0, \"ResultDesc\": \"Success\"}");
+            }
+        } 
+        
+        return crow::response(200, "{\"ResultCode\": 1, \"ResultDesc\": \"Failed\"}");
     });
 
-    // Start the server
+    // Run the server on all available network interfaces
     app.port(18080).multithreaded().run();
 }
