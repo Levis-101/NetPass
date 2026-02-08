@@ -15,6 +15,8 @@ include_directories(include)
 add_executable(NetPass 
     src/main.cpp 
     src/firewall.cpp
+    src/scheduler.cpp
+    src/database.cpp
 )
 
 # Link libraries (Threads is used for the Session Reaper)
