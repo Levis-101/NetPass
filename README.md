@@ -79,3 +79,20 @@ Phone Number (for customer support)
 Amount Paid (for business analytics)
 
 Timestamp (for session recovery)
+
+## 💰 Supported Subscription Plans
+The system automatically detects the payment amount from M-Pesa and grants access based on the following tiers:
+
+| Amount (KES) | Duration | Description |
+| :--- | :--- | :--- |
+| **15** | 3 Hours | Student / Short-term pass |
+| **30** | 6 Hours | Half-day access |
+| **50** | 24 Hours | Full Day Unlimited |
+| **100** | 3 Days | Weekend / Mini-pass |
+| **150** | 7 Days | Weekly Subscription |
+| **400** | 30 Days | Monthly Premium |
+
+## 🛠 Recent Updates
+- **Multi-Tier Logic:** Implemented a descending conditional check to ensure users are granted the correct time-slice for their payment.
+- **Enhanced Logging:** Transactions are now logged to `transactions.csv` with timestamps and MAC addresses for auditing.
+- **Session Reaper Integration:** Integrated a background thread that automatically revokes `iptables` rules upon session expiry.
