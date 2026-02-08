@@ -1,7 +1,7 @@
 #include <iostream>
 #include <string>
-#include "firewall.cpp"   // In a real project, we'd use headers, but this works for now
-#include "scheduler.cpp"
+#include "include/firewall.h"   // In a real project, we'd use headers, but this works for now
+
 
 int main() {
     NetFirewall firewall;
